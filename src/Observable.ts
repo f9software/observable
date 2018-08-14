@@ -6,13 +6,13 @@ export abstract class Observable {
             .forEach(eventName => this.listeners[eventName] = []);
     }
 
-    protected abstract initEvents();
+    protected abstract initEvents(): string[];
 
-    addEventListener(eventName, handler) {
+    addEventListener(eventName: string, handler: (...args: any[]) => void) {
         this.listeners[eventName].push(handler);
     }
 
-    removeEventListener(eventName, handler) {
+    removeEventListener(eventName: string, handler: (...args: any[]) => void) {
         const index = this.listeners[eventName].findIndex(savedHandler => savedHandler === handler);
 
         if (index > -1) {
@@ -20,7 +20,7 @@ export abstract class Observable {
         }
     }
 
-    fireEvent(eventName, ...args) {
+    fireEvent(eventName: string, ...args: any[]) {
         this.listeners[eventName]
             .forEach(handler => handler(this, ...args));
     }
