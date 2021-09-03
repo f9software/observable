@@ -1,27 +1,32 @@
+export interface Listener {
+	(observable: Observable, ...args: any[]): false | void;
+}
+
 export abstract class Observable {
-    listeners:{[key: string]: Function[]} = {};
+    private listeners: Map<string, Set<Listener>> = new Map();
 
     constructor() {
         this.initEvents()
-            .forEach(eventName => this.listeners[eventName] = []);
+            .forEach(eventName => this.listeners.set(eventName, new Set()));
     }
 
     protected abstract initEvents(): string[];
 
-    addEventListener(eventName: string, handler: (...args: any[]) => void) {
-        this.listeners[eventName].push(handler);
+    addEventListener(eventName: string, listener: Listener) {
+		this.listeners.get(eventName)?.add(listener);
     }
 
-    removeEventListener(eventName: string, handler: (...args: any[]) => void) {
-        const index = this.listeners[eventName].findIndex(savedHandler => savedHandler === handler);
-
-        if (index > -1) {
-            this.listeners[eventName].splice(index, 1);
-        }
+    removeEventListener(eventName: string, listener: Listener) {
+		this.listeners.get(eventName)?.delete(listener);
     }
 
-    fireEvent(eventName: string, ...args: any[]) {
-        this.listeners[eventName]
-            .forEach(handler => handler(this, ...args));
+    fireEvent(eventName: string, ...args: any[]): false | void {
+		const listeners = Array.from(this.listeners.get(eventName) || []);
+
+		for (let i = 0; i < listeners.length; i++) {
+			if (listeners[i](this, ...args) === false) {
+				return false;
+			}
+		}
     }
 }
