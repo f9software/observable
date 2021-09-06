@@ -1,6 +1,6 @@
 {
 	"name": "ii-observable",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"description": "A implementation of the Observable pattern.",
 	"main": "dist/index.js",
 	"scripts": {
@@ -22,5 +22,8 @@
 	"homepage": "https://github.com/iiulian/observable#readme",
 	"devDependencies": {
 		"typescript": "^4.4.0"
-	}
+	},
+	"files": [
+		"dist"
+	]
 }
