@@ -4,7 +4,7 @@
 	"description": "A implementation of the Observable pattern.",
 	"main": "dist/index.js",
 	"scripts": {
-		"tsc": "./node_modules/.bin/tsc -p ./tsconfig.json",
+		"tsc": "rm -rf ./dist && ./node_modules/.bin/tsc -p ./tsconfig.json",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
