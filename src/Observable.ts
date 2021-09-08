@@ -6,27 +6,29 @@ export interface Listener<O extends Observable> {
 
 export type ListenerResult = false | void | Promise<false | void>;
 
-export abstract class Observable implements ObservableInterface {
+export class Observable implements ObservableInterface {
     private listeners: Map<string, Set<Listener<this>>> = new Map();
 
-    constructor() {
-    	this.initEvents()
-    		.forEach(eventName => this.listeners.set(eventName, new Set()));
-    }
-
-    protected abstract initEvents(): string[];
+	/**
+	 * initEvents method is deprecated and will be removed in future versions.
+	 * @deprecated
+	 * @returns {string[]}
+	 */
+    protected initEvents(): string[] {
+		return [];
+	}
 
     addEventListener(eventName: string, listener: Listener<this>) {
-    	this.listeners.get(eventName)?.add(listener);
+    	this.getListeners(eventName).add(listener);
     }
 
     removeEventListener(eventName: string, listener: Listener<this>) {
-    	this.listeners.get(eventName)?.delete(listener);
+    	this.getListeners(eventName).delete(listener);
     }
 
     fireEvent(eventName: string, ...args: any[]): ListenerResult {
 		const promises: Promise<false | void>[] = [];
-		const listeners = Array.from(this.listeners.get(eventName) || []);
+		const listeners = Array.from(this.getListeners(eventName));
 
 		let rs: ListenerResult;
 		for (let i = 0; i < listeners.length; i++) {
@@ -63,4 +65,22 @@ export abstract class Observable implements ObservableInterface {
 				);
 		}
     }
+
+	clear(eventName?: string) {
+		eventName ? this.listeners.delete(eventName) : this.listeners.clear();
+	}
+
+	destroy() {
+		this.clear();
+	}
+
+	private getListeners(eventName: string): Set<Listener<this>> {
+		let set = this.listeners.get(eventName);
+		if (!set) {
+			set = new Set();
+			this.listeners.set(eventName, set);
+		}
+
+		return set;
+	}
 }
