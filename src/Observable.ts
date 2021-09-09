@@ -9,6 +9,8 @@ export type ListenerResult = false | void | Promise<false | void>;
 export class Observable implements ObservableInterface {
     private listeners: Map<string, Set<Listener<this>>> = new Map();
 
+	constructor(private observed?: any) {}
+
 	/**
 	 * initEvents method is deprecated and will be removed in future versions.
 	 * @deprecated
@@ -29,10 +31,11 @@ export class Observable implements ObservableInterface {
     fireEvent(eventName: string, ...args: any[]): ListenerResult {
 		const promises: Promise<false | void>[] = [];
 		const listeners = Array.from(this.getListeners(eventName));
+		const observed = this.observed || this;
 
 		let rs: ListenerResult;
 		for (let i = 0; i < listeners.length; i++) {
-			rs = listeners[i](this, ...args);
+			rs = listeners[i](observed, ...args);
 
 			if (rs instanceof Promise) {
 				// if the result is a promise, it means we're dealing with a async listener and we don't
@@ -72,6 +75,7 @@ export class Observable implements ObservableInterface {
 
 	destroy() {
 		this.clear();
+		this.observed = undefined;
 	}
 
 	private getListeners(eventName: string): Set<Listener<this>> {
