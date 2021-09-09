@@ -1,15 +1,15 @@
 export interface ObservableInterface {}
 
-export interface Listener<O extends Observable> {
-	(observable: O, ...args: any[]): ListenerResult;
+export interface Listener<O> {
+	(observed: O, ...args: any[]): ListenerResult;
 }
 
 export type ListenerResult = false | void | Promise<false | void>;
 
-export class Observable implements ObservableInterface {
-    private listeners: Map<string, Set<Listener<this>>> = new Map();
+export class Observable<O> implements ObservableInterface {
+    private listeners: Map<string, Set<Listener<O>>> = new Map();
 
-	constructor(private observed?: any) {}
+	constructor(private observed: O) {}
 
 	/**
 	 * initEvents method is deprecated and will be removed in future versions.
@@ -20,18 +20,18 @@ export class Observable implements ObservableInterface {
 		return [];
 	}
 
-    addEventListener(eventName: string, listener: Listener<this>) {
+    addEventListener(eventName: string, listener: Listener<O>) {
     	this.getListeners(eventName).add(listener);
     }
 
-    removeEventListener(eventName: string, listener: Listener<this>) {
+    removeEventListener(eventName: string, listener: Listener<O>) {
     	this.getListeners(eventName).delete(listener);
     }
 
     fireEvent(eventName: string, ...args: any[]): ListenerResult {
 		const promises: Promise<false | void>[] = [];
 		const listeners = Array.from(this.getListeners(eventName));
-		const observed = this.observed || this;
+		const observed = this.observed;
 
 		let rs: ListenerResult;
 		for (let i = 0; i < listeners.length; i++) {
@@ -75,10 +75,9 @@ export class Observable implements ObservableInterface {
 
 	destroy() {
 		this.clear();
-		this.observed = undefined;
 	}
 
-	private getListeners(eventName: string): Set<Listener<this>> {
+	private getListeners(eventName: string): Set<Listener<O>> {
 		let set = this.listeners.get(eventName);
 		if (!set) {
 			set = new Set();
